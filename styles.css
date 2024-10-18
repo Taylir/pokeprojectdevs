@@ -1,6 +1,6 @@
-*{
+* {
   padding: 0;
-  margin: 0;  
+  margin: 0;
   box-sizing: border-box;
 }
 
@@ -17,7 +17,99 @@ body {
 }
 
 .border_holder {
-  height:90%;
+  height: 90%;
   width: 90%;
   border: 4px solid #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-attachment: fixed;
+  background-image: url("assets/pokebackground.webp");
+  background-postition: top 30%; 
+  background-repeat:no-repeat;
+  background-size: cover;
 }
+
+.form {
+  width: fit-content;
+  height: fit-content;
+  position: relative;
+}
+
+.input {
+  height: 100px;
+  width: 100px;
+  border-style: none;
+  padding: 10;
+  font-size: 18px;
+  letter-spacing: 2px;
+  outline: none;
+  border-radius: 50%;
+  transition: all 500ms ease-in-out;
+  padding-right: 40px;
+  background-color: #22a6b3;
+  color: #fff;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.0);
+  font-size: 18px;
+  letter-spacing: 2px;
+  font-weight: 100;
+  transition: all 500ms ease-in-out;
+}
+
+.btn-search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border-style: none;
+  font-size: 20px;
+  font-weight: bold;
+  outline: none;
+  cursor: pointer;
+  border-radius: 50%;
+  position: absolute;
+  right: 0px;
+  color: #fff;
+  background: linear-gradient(to bottom, red 0% 45%, black 45% 55%, white 55% 100%);
+  pointer-events: painted;
+} 
+
+@keyframes slightRock {
+  65% {transform: rotate(45deg)};
+  90% {transform: rotate(-10deg)}
+}
+
+.fa-solid.fa-magnifying-glass-minus {
+  color: #000;
+  font-size: 30px;
+}
+
+.btn-search:focus ~ .input {
+  width: 500px;
+  border-radius: 0px;
+  background-color: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 500ms cubic-bezier(0, 0.11, 0.35, 2);
+}
+
+.btn-search:focus {
+  animation: slightRock 620ms ease-in-out;
+}
+
+.input:focus {
+  width: 300px;
+  border-radius: 0px;
+  background-color: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 500ms cubic-bezier(0, 0.11, 0.35, 2);
+}
+
+.btn-search:focus ~ .input::placeholder {
+  color:rgba(255, 255, 255, 0.8);
+}
+
+
