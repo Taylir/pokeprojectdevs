@@ -68,6 +68,10 @@ body {
   color: #fff;
   background: linear-gradient(to bottom, red 0% 45%, black 45% 55%, white 55% 100%);
   pointer-events: painted;
+}
+
+.btn-search:active {
+  animation: slightRock 620ms ease-in-out;
 } 
 
 @keyframes slightRock {
@@ -109,7 +113,7 @@ body {
 .input:focus {
   text-align: center;
   color: black;
-  padding-left: 8px;
+  padding-left: -12px;
   width: 500px;
   border-radius: 50px;
   background-color: rgba(0,0,0,.4);
