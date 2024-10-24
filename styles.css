@@ -8,6 +8,13 @@ body {
   background-color: #f0f0f0;
 }
 
+.loading_header {
+  display:none;
+}
+
+.loading_header.visable {
+  display:block;
+}
 .hero_section {
   display: grid;
   place-items: center;
