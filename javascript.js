@@ -52,7 +52,7 @@ getAllPokemon();
 
 //const poke = testPoke.then(data => data);
 
-function showPokemon(show = 20) {
+function showPokemon(show = 5) {
   shownPokemon += show;
   return tempGrabCache().results.splice(0, show);
 }
@@ -62,25 +62,31 @@ async function cleanPokeArray() {
   const requests = urls.map((url) => fetch(url));
 
   const response = await Promise.all(requests);
-  const data = await Promise.all(response.map(responses => responses.json()));
-  console.log(data);
+  const data = await Promise.all(response.map((responses) => responses.json()));
+  return data;
 }
 
-cleanPokeArray();
+async function displayPokemon() {
+  const wantedPoke = await cleanPokeArray();
 
-pokeGrid.innerHTML = `
-      <div class="pokeCard_holder">
+  const mappedPoke = wantedPoke.map((poke) => {
+    return (`<div class="pokeCard_holder">
         <div class="pokeCard_name">
-          <h3>Bulbasaur</h3>
+          <h3>${poke.name}</h3>
         </div>
         <div class="pokeCard_type">
-          <p>Grass</p>
-          <p>Poison</p>
+          <p>${poke.types[0].type.name}</p>
+          <p>${poke.types[1]?.type.name || ""}</p>
         </div>
         <div class="pokeCard_img">
           <img
-            src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
+            src=${poke.sprites.front_default}
             alt=""
           />
         </div>
-      </div>`;
+      </div>`);
+  });
+  pokeGrid.innerHTML = mappedPoke.join("");
+}
+
+displayPokemon();
