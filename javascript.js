@@ -16,7 +16,9 @@ function searchPokemon(pokemon) {
 }
 
 function displayPokemon(arr) {
-  return arr.map(poke => `<div id=${poke.id} class="pokeCard_holder">
+  return arr
+    .map(
+      (poke) => `<div id=${poke.id} class="pokeCard_holder">
         <div class="pokeCard_name">
           <h3>${poke.name}</h3>
         </div>
@@ -30,8 +32,10 @@ function displayPokemon(arr) {
             alt=""
           />
         </div>
-      </div>`).join("");
-} 
+      </div>`,
+    )
+    .join("");
+}
 
 function pokeballSearch(e) {
   if (e.type == "click" || e.key == "Enter") {
@@ -40,7 +44,6 @@ function pokeballSearch(e) {
     searchForm.value = "";
   }
 }
-
 
 class Pokemon {
   constructor(id, name, type1, type2, picture, shiny) {
@@ -53,38 +56,45 @@ class Pokemon {
   }
 }
 
-async function getWholePokemon(){
+async function getWholePokemon() {
   const cachedData = localStorage.getItem("pokeData");
 
   if (cachedData) {
     console.log("Have the pokeData");
-    console.log(JSON.parse(cachedData)[0].type1);
     pokeGrid.innerHTML = displayPokemon(JSON.parse(cachedData));
     return JSON.parse(cachedData);
   }
 
   console.log("Getting data from api");
-  let pokePromiseArray = [];
-  for (let i = 1; i <= 1025; i++){
-    pokePromiseArray[i-1] = await fetch(`https://pokeapi.co/api/v2/pokemon/${i}`)
-      .then(resp => resp.json());
+  const pokemonToCache = [];
+  for (let i = 0; i <= 100; i += 25) {
+    console.log(i);
+    const pokePromiseArray = [];
+    for (let j = i + 1; j <= i + 25; j++) {
+      pokePromiseArray[j - i - 1] = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/${j}`,
+      ).then((resp) => resp.json());
+    }
+    console.log(pokePromiseArray);
+    const promisedPokemon = await Promise.all(pokePromiseArray);
+    const cachedPokemon = promisedPokemon.map(
+      (poke) =>
+        new Pokemon(
+          poke.id,
+          poke.name.charAt(0).toUpperCase() + poke.name.slice(1),
+          poke.types[0].type.name.charAt(0).toUpperCase() +
+            poke.types[0].type.name.slice(1),
+          poke.types[1]?.type.name.charAt(0).toUpperCase() +
+            poke.types[1]?.type.name.slice(1) || "",
+          poke.sprites.front_default,
+          poke.sprites.front_shiny,
+        ),
+    );
+    pokemonToCache.push(...cachedPokemon);
+    pokeGrid.innerHTML += displayPokemon(cachedPokemon);
+    localStorage.setItem("pokeData", JSON.stringify(pokemonToCache));
+    console.log(`I ran ${i+1} time`);
   }
-  
-  const promisedPokemon = await Promise.all(pokePromiseArray);
-
-  const cachedPokemon = promisedPokemon
-    .map(poke => new Pokemon(
-      poke.id, 
-      poke.name.charAt(0).toUpperCase() + poke.name.slice(1), 
-      poke.types[0].type.name.charAt(0).toUpperCase() + poke.types[0].type.name.slice(1), 
-      (poke.types[1]?.type.name.charAt(0).toUpperCase() + poke.types[1]?.type.name.slice(1) || ""),
-      poke.sprites.front_default,
-      poke.sprites.front_shiny
-    ));
- 
-  console.log(promisedPokemon);
-  localStorage.setItem("pokeData", JSON.stringify(cachedPokemon));
-  pokeGrid.innerHTML = displayPokemon(cachedPokemon);
 }
 
 getWholePokemon();
