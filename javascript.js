@@ -3,10 +3,6 @@ const pokeSearch = document.querySelector(".btn-search");
 const pokeGrid = document.querySelector("#pokeCards_grid");
 let shownPokemon = 0;
 
-function tempGrabCache() {
-  return JSON.parse(localStorage.getItem("pokeData"));
-}
-
 function searchPokemon(pokemon) {
   const cachedData = localStorage.getItem("pokeData");
   if (!cachedData) {
@@ -16,77 +12,82 @@ function searchPokemon(pokemon) {
 
   const data = JSON.parse(cachedData);
 
-  console.log(data.results.filter((item) => item.name.includes(pokemon)));
+  return data.filter((item) => item.name.includes(pokemon.toLowerCase()));
 }
 
-function pokeballSearch(e) {
-  if (e.type == "click" || e.key == "Enter") {
-    searchPokemon(searchForm.value);
-    searchForm.value = "";
-  }
-}
-
-async function getAllPokemon() {
-  const cachedData = localStorage.getItem("pokeData");
-
-  if (cachedData) {
-    console.log("Have the pokeData");
-    return JSON.parse(cachedData);
-  }
-
-  console.log("Getting Data from API");
-  const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=1302");
-  const data = await response.json();
-
-  localStorage.setItem("pokeData", JSON.stringify(data));
-
-  console.log(data);
-}
-
-pokeSearch.addEventListener("click", (e) => pokeballSearch(e));
-searchForm.addEventListener("keyup", (e) => pokeballSearch(e));
-
-getAllPokemon();
-
-//const testPoke = fetch(tempGrabCache().results[0].url).then(res => res.json());
-
-//const poke = testPoke.then(data => data);
-
-function showPokemon(show = 5) {
-  shownPokemon += show;
-  return tempGrabCache().results.splice(0, show);
-}
-
-async function cleanPokeArray() {
-  const urls = showPokemon().map((poke) => poke.url);
-  const requests = urls.map((url) => fetch(url));
-
-  const response = await Promise.all(requests);
-  const data = await Promise.all(response.map((responses) => responses.json()));
-  return data;
-}
-
-async function displayPokemon() {
-  const wantedPoke = await cleanPokeArray();
-
-  const mappedPoke = wantedPoke.map((poke) => {
-    return (`<div class="pokeCard_holder">
+function displayPokemon(arr) {
+  return arr.map(poke => `<div id=${poke.id} class="pokeCard_holder">
         <div class="pokeCard_name">
           <h3>${poke.name}</h3>
         </div>
         <div class="pokeCard_type">
-          <p>${poke.types[0].type.name}</p>
-          <p>${poke.types[1]?.type.name || ""}</p>
+          <p>${poke.type1}</p>
+          <p>${poke.type2}</p>
         </div>
         <div class="pokeCard_img">
           <img
-            src=${poke.sprites.front_default}
+            src=${poke.picture}
             alt=""
           />
         </div>
-      </div>`);
-  });
-  pokeGrid.innerHTML = mappedPoke.join("");
+      </div>`).join("");
+} 
+
+function pokeballSearch(e) {
+  if (e.type == "click" || e.key == "Enter") {
+    pokeGrid.innerHTML = "";
+    pokeGrid.innerHTML = displayPokemon(searchPokemon(searchForm.value));
+    searchForm.value = "";
+  }
 }
 
-displayPokemon();
+
+class Pokemon {
+  constructor(id, name, type1, type2, picture, shiny) {
+    this.id = id;
+    this.name = name;
+    this.type1 = type1;
+    this.type2 = type2;
+    this.picture = picture;
+    this.shiny = shiny;
+  }
+}
+
+async function getWholePokemon(){
+  const cachedData = localStorage.getItem("pokeData");
+
+  if (cachedData) {
+    console.log("Have the pokeData");
+    console.log(JSON.parse(cachedData)[0].type1);
+    pokeGrid.innerHTML = displayPokemon(JSON.parse(cachedData));
+    return JSON.parse(cachedData);
+  }
+
+  console.log("Getting data from api");
+  let pokePromiseArray = [];
+  for (let i = 1; i <= 1025; i++){
+    pokePromiseArray[i-1] = await fetch(`https://pokeapi.co/api/v2/pokemon/${i}`)
+      .then(resp => resp.json());
+  }
+  
+  const promisedPokemon = await Promise.all(pokePromiseArray);
+
+  const cachedPokemon = promisedPokemon
+    .map(poke => new Pokemon(
+      poke.id, 
+      poke.name.charAt(0).toUpperCase() + poke.name.slice(1), 
+      poke.types[0].type.name.charAt(0).toUpperCase() + poke.types[0].type.name.slice(1), 
+      (poke.types[1]?.type.name.charAt(0).toUpperCase() + poke.types[1]?.type.name.slice(1) || ""),
+      poke.sprites.front_default,
+      poke.sprites.front_shiny
+    ));
+ 
+  console.log(promisedPokemon);
+  localStorage.setItem("pokeData", JSON.stringify(cachedPokemon));
+  pokeGrid.innerHTML = displayPokemon(cachedPokemon);
+}
+
+getWholePokemon();
+
+pokeSearch.addEventListener("click", (e) => pokeballSearch(e));
+searchForm.addEventListener("keyup", (e) => pokeballSearch(e));
