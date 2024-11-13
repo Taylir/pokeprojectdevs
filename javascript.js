@@ -12,7 +12,7 @@ function searchPokemon(pokemon) {
 
   const data = JSON.parse(cachedData);
 
-  return data.filter((item) => item.name.includes(pokemon.toLowerCase()));
+  return data.filter((item) => item.name.toLowerCase().includes(pokemon.toLowerCase()));
 }
 
 function displayPokemon(arr) {
@@ -67,7 +67,7 @@ async function getWholePokemon() {
 
   console.log("Getting data from api");
   const pokemonToCache = [];
-  for (let i = 0; i <= 100; i += 25) {
+  for (let i = 0; i < 1025; i += 25) {
     console.log(i);
     const pokePromiseArray = [];
     for (let j = i + 1; j <= i + 25; j++) {
